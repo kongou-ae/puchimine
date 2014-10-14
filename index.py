@@ -31,7 +31,8 @@ def project(project_id):
     project_dict = puchimine.load_project_name()
     project = project_dict[int(project_id)]
     issue_dict = puchimine.load_ticket_summary(project_id)
-    return template('ticket',issue_dict = issue_dict, project = project,project_member_dict = project_member_dict)
+    project_member_dict = puchimine.load_project_member(project_id)
+    return template('ticket',issue_dict = issue_dict, project = project, project_member_dict = project_member_dict)
 
 @route('/puchimine/project/<project_id>/issue/<issue_id>/', method="GET")
 def project(project_id,issue_id):
@@ -58,7 +59,7 @@ def project(project_id,issue_id):
     issue_dict = puchimine.load_ticket_summary(project_id)
     issue_detail_dict = puchimine.load_ticket_detail_summary(issue_id)
 
-    return template('ticket_detail',issue_dict = issue_dict, issue_detail_dict = issue_detail_dict  )
+    return template('ticket_detail',issue_dict = issue_dict, issue_detail_dict = issue_detail_dict ,project = project)
 
 @route('/puchimine/')
 def index():

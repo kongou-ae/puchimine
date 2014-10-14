@@ -20,7 +20,7 @@ def load_project_name():
     '''
 
     redmine_url,redmine_api_key = config_load()
-    project_dict = {}
+    project_dict = collections.OrderedDict()
 
     url = redmine_url + 'projects.json'
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
@@ -56,7 +56,7 @@ def load_ticket_summary(project_id):
     プロジェクトに含まれるチケットの情報をjsonで返す
     '''
     redmine_url,redmine_api_key = config_load()
-    issue_dict = {}
+    issue_dict = collections.OrderedDict()
 
     url = redmine_url + 'issues.json?project_id=' + project_id
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})

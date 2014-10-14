@@ -3,6 +3,7 @@
 import json
 import requests
 import datetime
+import collections
 
 def config_load():
     '''

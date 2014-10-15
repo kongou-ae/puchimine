@@ -7,6 +7,13 @@
                     <li><a href="issue/{{ issue_key }}/">{{ issue_dict[issue_key] }}</a></li>
                 {% endfor %}
             </ul>
+            <ul class="pagination">
+                <li class="disabled"><a href="#">&laquo;</a></li>
+                {% for i in range(1,page) %}
+                <li><a href="../{{ i }}/">{{ i }}</a></li>
+                <li><a href="#">&raquo;</a></li>
+                {% endfor %}
+            </ul>
         </div>
         <div class="col-md-8">
             <form role="form" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">

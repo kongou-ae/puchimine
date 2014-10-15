@@ -4,7 +4,7 @@
             <h2>プロジェクト一覧</h2>
             <ul class="project">
                 {% for dict_key in project_dict %}
-                    <li><a href="../puchimine/project/{{ dict_key }}/">{{ project_dict[dict_key] }}</a></li>
+                    <li><a href="../puchimine/project/{{ dict_key }}/1/">{{ project_dict[dict_key] }}</a></li>
                 {% endfor %}
             </ul>
         </div>

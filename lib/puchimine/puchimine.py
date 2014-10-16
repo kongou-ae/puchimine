@@ -24,7 +24,7 @@ def load_project_name():
     redmine_url,redmine_api_key = config_load()
     project_dict = collections.OrderedDict()
 
-    url = redmine_url + 'projects.json'
+    url = redmine_url + 'projects.json?limit=100'
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
     data = json.loads(r.text)
 
@@ -129,7 +129,7 @@ def load_ticket_detail_summary(ticlet_id):
     issue_detail_dict['journals'] = data['issue']['journals']
 
     # journalsを逆順にソートする。
-    issue_detail_dict['journals'] = list(reversed(issue_detail_dict['journals']))
+    #issue_detail_dict['journals'] = list(reversed(issue_detail_dict['journals']))
     # 時刻をJST(+9)に変更。bottleがコードが渡す時にJSTにできないの？
     for journal in issue_detail_dict['journals']:
         created_on = journal['created_on']

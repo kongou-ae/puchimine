@@ -68,6 +68,8 @@ def project(project_id,issue_id,page):
     status_update = request.forms.get('status')
     puchimine.update_journal(issue_id,journal_update,status_update)
 
+    project_dict = puchimine.load_project_name()
+    project = project_dict[int(project_id)]
     issue_dict,pages = puchimine.load_ticket_per_page(project_id,page)
     issue_detail_dict = puchimine.load_ticket_detail_summary(issue_id)
     status_dict = puchimine.show_status()

@@ -38,7 +38,11 @@
                     <div class="form-group">
                         <select class="form-control" name="status">
                             {% for id in status_dict  %}
-                            <option value="{{ id }}">{{ status_dict[id] }}</option>
+                                {% if status_dict[id] == issue_detail_dict['status'] %}
+                                    <option value="{{ id }}" selected>{{ status_dict[id] }}</option>
+                                {% else%}
+                                    <option value="{{ id }}">{{ status_dict[id] }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>

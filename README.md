@@ -28,6 +28,6 @@ Puchimine is designed to manage the  ticket casually. So puchimine displays and 
  3. open "config.json" and edit the sample code to your real parameter.
 
 ## Usage
- 1. python index.py
- 2. open your web browser and access to
-http://localist:8082/puchimine/
+ 1. cd puchimine
+ 2. python index.py
+ 3. open your web browser and access to http://localist:8082/puchimine/

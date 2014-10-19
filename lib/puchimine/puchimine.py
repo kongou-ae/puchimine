@@ -78,7 +78,7 @@ def load_ticket_summary(project_id):
 
     return issue_dict,pages
 
-def load_ticket_per_page(project_id,page):
+def load_ticket_per_page(project_id,page,tracker_id):
     '''
     プロジェクトに含まれるチケットの情報をjsonで返す
     '''
@@ -86,13 +86,21 @@ def load_ticket_per_page(project_id,page):
     issue_dict = collections.OrderedDict()
 
     # ページ数を確認する
-    url = redmine_url + 'issues.json?project_id=' + project_id
+    if tracker_id == '':
+        url = redmine_url + 'issues.json?project_id=' + project_id
+    else:
+        url = redmine_url + 'issues.json?project_id=' + project_id + '&tracker_id=' + tracker_id
+
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
     data = json.loads(r.text)
     pages = math.floor(data['total_count']/data['limit']) +1
 
     # 指定されたページのチケットを取得する
-    url = redmine_url + 'issues.json?project_id=' + project_id + '&page=' + page
+    if tracker_id == '':
+        url = redmine_url + 'issues.json?project_id=' + project_id + '&page=' + page
+    else:
+        url = redmine_url + 'issues.json?project_id=' + project_id + '&page=' + page + '&tracker_id=' + tracker_id
+
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
     data = json.loads(r.text)
 

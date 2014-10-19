@@ -7,26 +7,45 @@ import sys
 sys.path.append('../puchimine/lib/puchimine')
 import puchimine
 
-@route('/puchimine/project/<project_id>/')
-def project(project_id):
+# ----------------------------------------------
+# どのルートでも使う処理を関数化
+# ----------------------------------------------
 
+def get_project(project_id):
+    '''
+    プロジェクト名を取得する
+    '''
     project_dict = puchimine.load_project_name()
     project = project_dict[int(project_id)]
-    issue_dict,pages = puchimine.load_ticket_summary(project_id)
 
-    project_member_dict = puchimine.load_project_member(project_id)
+    return project
 
-    return template('ticket',issue_dict = issue_dict, project = project,project_member_dict = project_member_dict)
+# ----------------------------------------------
+
+def get_ticket(project_id,page):
+
+    # 表示するチケットを制限したい場合は、tracker_idを入力する
+    tracker_id = ''
+
+    issue_dict,pages = puchimine.load_ticket_per_page(project_id=project_id,page=page,tracker_id=tracker_id)
+
+    return issue_dict,pages
+
+# ----------------------------------------------
+# ルートを設定
+# ----------------------------------------------
 
 @route('/puchimine/project/<project_id>/<page>/')
 def project(project_id,page):
 
-    project_dict = puchimine.load_project_name()
-    project = project_dict[int(project_id)]
-    issue_dict,pages = puchimine.load_ticket_per_page(project_id,page)
+    project = get_project(project_id)
+    issue_dict,pages = get_ticket(project_id=project_id,page=page)
+
     project_member_dict = puchimine.load_project_member(project_id)
 
     return template('ticket',issue_dict = issue_dict, project = project,project_member_dict = project_member_dict, page=int(pages)+1)
+
+# ----------------------------------------------
 
 @route('/puchimine/project/<project_id>/<page>/', method="POST")
 def project(project_id,page):
@@ -38,18 +57,21 @@ def project(project_id,page):
 
     puchimine.create_ticket(project_id,ticket_subject,ticket_assign,ticket_description)
 
-    project_dict = puchimine.load_project_name()
-    project = project_dict[int(project_id)]
-    issue_dict,pages = puchimine.load_ticket_per_page(project_id,page)
+    project = get_project(project_id)
+    issue_dict,pages = get_ticket(project_id=project_id,page=page)
+
     project_member_dict = puchimine.load_project_member(project_id)
+
     return template('ticket',issue_dict = issue_dict, project = project, project_member_dict = project_member_dict, page=int(pages)+1)
+
+# ----------------------------------------------
 
 @route('/puchimine/project/<project_id>/<page>/issue/<issue_id>/', method="GET")
 def project(project_id,issue_id,page):
 
-    project_dict = puchimine.load_project_name()
-    project = project_dict[int(project_id)]
-    issue_dict,pages = puchimine.load_ticket_per_page(project_id,page)
+    project = get_project(project_id)
+    issue_dict,pages = get_ticket(project_id=project_id,page=page)
+
     issue_detail_dict = puchimine.load_ticket_detail_summary(issue_id)
     status_dict = puchimine.show_status()
 
@@ -60,6 +82,8 @@ def project(project_id,issue_id,page):
 
     return template('ticket_detail',issue_dict = issue_dict, issue_detail_dict = issue_detail_dict,project = project,page=int(pages)+1,status_dict = status_dict )
 
+# ----------------------------------------------
+
 @route('/puchimine/project/<project_id>/<page>/issue/<issue_id>/' ,method="POST")
 def project(project_id,issue_id,page):
 
@@ -68,17 +92,34 @@ def project(project_id,issue_id,page):
     status_update = request.forms.get('status')
     puchimine.update_journal(issue_id,journal_update,status_update)
 
-    project_dict = puchimine.load_project_name()
-    project = project_dict[int(project_id)]
-    issue_dict,pages = puchimine.load_ticket_per_page(project_id,page)
+    project = get_project(project_id)
+    issue_dict,pages = get_ticket(project_id=project_id,page=page)
+
     issue_detail_dict = puchimine.load_ticket_detail_summary(issue_id)
     status_dict = puchimine.show_status()
 
     return template('ticket_detail',issue_dict = issue_dict, issue_detail_dict = issue_detail_dict ,project = project,page=int(pages)+1,status_dict = status_dict )
 
+# ----------------------------------------------
+
 @route('/puchimine/')
 def index():
     project_dict = puchimine.load_project_name()
     return template('index',project_dict=project_dict)
+
+# ----------------------------------------------
+# テスト
+# ----------------------------------------------
+
+@route('/puchimine/cal/')
+def index():
+    return template('cal')
+
+@route('/puchimine/cal/codebase/<filename:path>')
+def static(filename):
+    return static_file(filename, root='./views/codebase/')
+
+
+# ----------------------------------------------
 
 run(host='127.0.0.1', port=8082)

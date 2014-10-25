@@ -10,7 +10,7 @@ def config_load():
     '''
     設定ファイルから必要なパラメータを取得する
     '''
-    config = json.load(open('..\puchimine\config.json'))
+    config = json.load(open('config.json'))
     redmine_url = config[0]['redmine_url']
     redmine_api_key = config[0]['redmine_api_key']
 

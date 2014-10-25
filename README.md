@@ -16,6 +16,7 @@ Puchimine is designed to manage the  ticket casually. So puchimine displays and 
  - Python3
  - Bottle
  - Jinja2
+ - requests
 
 ## Installation
  0. Enable the API of your redmine.

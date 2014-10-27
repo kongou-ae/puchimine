@@ -5,6 +5,7 @@ import requests
 import datetime
 import collections
 import math
+import datetime
 
 def config_load():
     '''
@@ -53,31 +54,6 @@ def load_project_member(project_id):
 
     return project_member_dict
 
-def load_ticket_summary(project_id):
-    '''
-    プロジェクトに含まれるチケットの情報をjsonで返す
-    '''
-    redmine_url,redmine_api_key = config_load()
-    issue_dict = collections.OrderedDict()
-
-    # ループする回数を確認する
-    url = redmine_url + 'issues.json?project_id=' + project_id
-    r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
-    data = json.loads(r.text)
-    pages = math.floor(data['total_count']/data['limit']) +1
-
-    for i in range(1,pages+1):
-        url = redmine_url + 'issues.json?project_id=' + project_id + '&page=' + str(i)
-        r= requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
-        data = json.loads(r.text)
-
-        for i in range(0,len(data['issues'])):
-            issue_name = data['issues'][i]['subject']
-            issue_id = data['issues'][i]['id']
-            issue_dict[issue_id] = issue_name
-
-    return issue_dict,pages
-
 def load_ticket_per_page(project_id,page,tracker_id):
     '''
     プロジェクトに含まれるチケットの情報をjsonで返す
@@ -112,14 +88,14 @@ def load_ticket_per_page(project_id,page,tracker_id):
     return issue_dict,pages
 
 
-def load_ticket_detail_summary(ticlet_id):
+def load_ticket_detail_summary(ticket_id):
     '''
     チケットIDを受け取り、チケットの詳細をdictで返す
     '''
     redmine_url,redmine_api_key = config_load()
     issue_detail_dict = {}
 
-    url = redmine_url + 'issues/' + ticlet_id + '.json?include=journals&limit=100'
+    url = redmine_url + 'issues/' + ticket_id + '.json?include=journals&limit=100'
     r = requests.get(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key': redmine_api_key})
     data = json.loads(r.text)
 
@@ -135,6 +111,18 @@ def load_ticket_detail_summary(ticlet_id):
     issue_detail_dict['subject'] = data['issue']['subject']
     issue_detail_dict['description'] = data['issue']['description']
     issue_detail_dict['journals'] = data['issue']['journals']
+
+    # 開始日未設定を確認し、-を代入しておく。
+    try:
+        issue_detail_dict['start_date'] = data['issue']['start_date']
+    except KeyError:
+        issue_detail_dict['start_date'] = '-'
+
+    # 終了日未設定を確認し、-を代入しておく。
+    try:
+        issue_detail_dict['due_date'] = data['issue']['due_date']
+    except KeyError:
+        issue_detail_dict['due_date'] = '-'
 
     # journalsを逆順にソートする。
     #issue_detail_dict['journals'] = list(reversed(issue_detail_dict['journals']))
@@ -205,17 +193,51 @@ def create_ticket(project_id,ticket_subject,ticket_assign,ticket_description):
 
     requests.post(url,headers={'Content-Type': 'application/json','X-Redmine-API-Key':redmine_api_key},data=data.encode('utf-8'))
 
+def make_calendar_var(project_id,page,tracker_id):
+
+    calendar_list = []
+
+    # プロジェクトIDに含まれるチケットのページ数を確認する
+    issue_dict,pages = load_ticket_per_page(project_id,page,tracker_id)
+
+    # ページ数でforを回して、全てのチケットIDを配列に入れる。
+    for page in range(1,int(pages)+1):
+        issue_dict,page = load_ticket_per_page(project_id,str(page),tracker_id)
+        # チケットIDでforをまわして、全てのカレンダーに必要な情報をjsonにしリストに入れる
+        for i in list(issue_dict.keys()):
+            issue_detail_dict = load_ticket_detail_summary(str(i))
+
+            # 開始日と終了日が-でなければ、日付が入っていると判断。
+            if  issue_detail_dict['start_date']  != '-' and issue_detail_dict['due_date']  != '-':
+                # fullday表示にするために、終了日に1日足しこむ
+                tmp = datetime.datetime.strptime( issue_detail_dict['due_date'], "%Y-%m-%d") + datetime.timedelta(days=1)
+                issue_detail_dict['due_date'] = tmp.strftime("%Y-%m-%d")
+            # 開始日か終了日が-であれば、仮の日付を入れる。
+            else:
+                issue_detail_dict['start_date'] = '2000-01-01'
+                issue_detail_dict['due_date'] = issue_detail_dict['start_date']
+
+            var_line = '{id:'+ str(issue_detail_dict['id']) + ', text:"【'+ issue_detail_dict['assigned_to'] + '】'  + issue_detail_dict['subject'] + '", start_date:"' + issue_detail_dict['start_date'] + ' 00:00", end_date:"' + issue_detail_dict['due_date'] +' 00:00"}'
+
+            calendar_list.append(var_line)
+
+    return calendar_list
+
 if __name__ == '__main__':
     project_dict = load_project_name()
     #print(project_dict)
 
-    issue_dict = load_ticket_summary("1")
+    #issue_dict = load_ticket_summary("1")
     #print(issue_dict)
 
-    issue_detail_dict = load_ticket_detail_summary("12")
+    #issue_dict = load_ticket_per_page("1","1","")
+
+    #issue_detail_dict = load_ticket_detail_summary("12")
     #print(issue_detail_dict)
 
-    project_member_dict = load_project_member("1")
+    #project_member_dict = load_project_member("1")
     #print(project_member_dict)
     #update_journal("7","pythonで更新")
     #print(show_status())
+
+    make_calendar_var("1","1","")

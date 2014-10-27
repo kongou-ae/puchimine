@@ -111,9 +111,11 @@ def index():
 # テスト
 # ----------------------------------------------
 
-@route('/puchimine/cal/')
-def index():
-    return template('cal')
+@route('/puchimine/cal/<project_id>/')
+def index(project_id):
+    var_data = puchimine.make_calendar_var(project_id=project_id,page="1",tracker_id="")
+
+    return template('cal',var_data=var_data )
 
 @route('/puchimine/cal/codebase/<filename:path>')
 def static(filename):

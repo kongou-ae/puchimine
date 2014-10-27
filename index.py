@@ -113,7 +113,10 @@ def index():
 
 @route('/puchimine/cal/<project_id>/')
 def index(project_id):
-    var_data = puchimine.make_calendar_var(project_id=project_id,page="1",tracker_id="")
+
+    # 表示するチケットを制限したい場合は、tracker_idを入力する
+    tracker_id = ''
+    var_data = puchimine.make_calendar_var(project_id=project_id,page="1",tracker_id=tracker_id)
 
     return template('cal',var_data=var_data )
 
